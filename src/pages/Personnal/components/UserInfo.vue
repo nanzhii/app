@@ -12,7 +12,7 @@
         </div>
         <div class="msg">
           <span>UID：</span>
-          <input type="text" v-model="uid" class="uid" />
+          <input type="text" v-model="uid" class="uid" readonly="readonly"/>
         </div>
         <div class="msg">
           <span>性别：</span>

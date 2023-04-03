@@ -9,9 +9,12 @@
             </div>
             <!-- 详细信息 -->
             <div class="goods_detail">
+              <!--价格-->
+              <div class="price"><span>价格：</span>{{goods.price}}元</div>
+              <!--成新率-->
+              <div class="price"><span>成新率：</span>{{goods.goodsnewold}}</div>
               <!-- 细节描述 -->
               <div class="detail_info">
-                <span class="iconfont icon-duihuaxinxi"></span>
                 <h3 class="info_head">详细信息</h3>
                 <p class="info_content">{{ goods.detail }}</p>
                 <img :src="goods.img[0]" alt="" v-if="goods.img[0]">
@@ -21,32 +24,36 @@
 
               <!-- 时间 -->
               <div class="time">
-                <span class="iconfont icon-shijian"></span>
                 <h3 class="detail_time">时间</h3>
                 <p class="detail_time">
                 发布商品：<br/>{{ goods.begin }}
                 </p>
-                <p class="detail_time" v-if="goods.buyer">
+                <p class="detail_time" v-show="goods.end">
                 交易结束：<br/>{{ goods.end }}
                 </p>
               </div>
              
               <!-- 买家 -->
-              <div class="buyer" v-if="goods.buyer">
-                <span class="iconfont icon-geren"></span>
+              <div class="buyer" v-show="goods.buyer">
                 <h2 class="detail_loca">买家：{{ goods.buyer }}</h2>
               </div>
 
               <!-- goodsBtn -->
               <div class="btnGroup">
                   <div v-if="!goods.end">
-                    <button class="btn_cancel" @click="Cancel_Goods(goods.goods_id)" v-show="cancel&&!goods.buyer">取消</button>
+                    <button class="btn_cancel" @click="Cancel_Goods(goods.goods_id)" v-show="mygoods&&!goods.buyer">下架</button>
                   </div>
                   <div>
-                    <button class="btn_goods" @click="Accomplish_Goods(goods.goods_id)" v-show="cancel&&goods.buyer&&!goods.end">完成</button>
+                    <button class="btn_cancel" @click="Cancel_BuyGoods(goods.goods_id)" v-show="mygoods&&goods.buyer&&(parseInt(goods.buyer_id)==parseInt(uid))&&!goods.end">取消</button>
                   </div>
                   <div>
-                    <button class="btn_goods" @click="Take_Goods(goods.goods_id)" v-show="!cancel">购买</button>
+                    <button class="btn_goods" @click="Accomplish_Goods(goods.goods_id)" v-show="mygoods&&goods.buyer&&(parseInt(goods.goodsee_id)==parseInt(uid))&&!goods.end">完成</button>
+                  </div>
+                  <div>
+                    <button class="btn_goods" @click="Take_Goods(goods.goods_id)" v-show="!mygoods">购买</button>
+                  </div>
+                  <div>
+                    <button class="btn_goods" @click="sendChangeGoodsFlag(goods.goods_id)" v-show="mygoods&&!goods.buyer">修改</button>
                   </div>
                 </div>
               </div>
@@ -59,12 +66,20 @@ import qs from "qs";
 
 export default {
   name: "AGoods",
-  props: ['goods','cancel'],
+  props: ['goods','mygoods'],
+  data(){
+    return{
+      uid:window.sessionStorage.getItem("UserID"),
+    }
+  },
   mounted(){
     this.goods.img=this.goods.img.split(",")
     // console.log('111',this.goods)
   },
   methods: {
+    sendChangeGoodsFlag(goods_id){
+      this.$emit('getChangeGoodsFlag',goods_id)
+    },
   //  购买商品
     Take_Goods(goods_id) {
       this.$axios
@@ -83,7 +98,7 @@ export default {
           } else if (res.data.success === -1) alert("购买失败");
         });
     },
-    // 取消商品
+    // 下架商品
     Cancel_Goods(goods_id) {
       this.$axios
         .post(
@@ -94,9 +109,25 @@ export default {
         )
         .then((res) => {
           if (res.data.success === 1) {
-            alert("取消成功");
+            alert("删除商品成功！");
             window.open(`../../myGoods.html`, `_self`);
-          } else if (res.data.success === -1) alert("取消失败");
+          } else if (res.data.success === -1) alert("删除商品失败！");
+        });
+    },
+    // 取消购买
+    Cancel_BuyGoods(goods_id){
+       this.$axios
+        .post(
+          "/api/Cancel_BuyGoods",
+          qs.stringify({
+            goods_id: goods_id,
+          })
+        )
+        .then((res) => {
+          if (res.data.success === 1) {
+            alert("取消购买成功！");
+            window.open(`../../myGoods.html`, `_self`);
+          } else if (res.data.success === -1) alert("取消购买失败！");
         });
     },
     // 交易完成
@@ -178,7 +209,16 @@ export default {
   padding: 10px 20px;
 }
 
-.goods_detail span {
+.goods_detail .price{
+  margin-bottom: 10px;
+}
+
+.goods_detail .price>span{
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.goods_detail>span {
   float: left;
   color: var(--color-base);
   font-size: 20px;

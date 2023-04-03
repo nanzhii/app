@@ -12,12 +12,7 @@
         </li>
         <li><a href="/myGoods.html" :class="{ active: MyGoods }">我的商品</a></li>
         <li>
-          <a
-            href="/Personnal.html"
-            class="iconfont icon-geren"
-            :class="{ active: Personnal }"
-            >个人信息</a
-          >
+          <a href="/Personnal.html" class="iconfont icon-geren" :class="{ active: Personnal }">{{uname}}</a>
         </li>
       </ul>
       <p>校园二手交易平台</p>
@@ -30,6 +25,11 @@ export default {
   name: "Nav",
   props: {
     activePage: String,
+  },
+  data(){
+    return{
+      uname:window.sessionStorage.getItem("UserNAME"),
+    }
   },
   computed: {
     createGoods() {

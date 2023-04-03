@@ -9,9 +9,20 @@
           <button class="iconfont icon-sousuo" @click="search_by_kwd()">搜索</button>
         </div>
 
+     <!--商品分类-->
+    <ul class="classify">
+    <li :class="{ active: isall }" @click="getGoodsSpecificList('全部')">全部</li>
+      <li :class="{ active: ishousehold_goods }" @click="getGoodsSpecificList('生活用品')">生活用品</li>
+      <li :class="{ active: isdiet }" @click="getGoodsSpecificList('饮食')">饮食</li>
+      <li :class="{ active: isdress }" @click="getGoodsSpecificList('服饰')">服饰</li>
+      <li :class="{ active: isdigital }" @click="getGoodsSpecificList('数码')">数码</li>
+      <li :class="{ active: ishome_appliances }" @click="getGoodsSpecificList('家电')">家电</li>
+      <li :class="{ active: ismab }" @click="getGoodsSpecificList('母婴')">母婴</li>
+    </ul>
+
     <ul class="content">
-      <li v-for="goods in goodsList" :key="goods.goods_id" v-show="!goods.buyer">
-        <AGoods :goods="goods" :goodsee="goodsee"/>
+      <li v-for="goods in goodsList" :key="goods.goods_id">
+        <AGoods :goods="goods"/>
       </li>
     </ul>
     <Footer />
@@ -31,8 +42,16 @@ export default {
   data(){
     return{
       goodsList:[],
+      goodsListrev:[],
       kwd:'',
-      cancel:false//取消按钮显示与否标志
+      cancel:false,//取消按钮显示与否标志
+      isall:true,//全部
+      ishousehold_goods:false,//生活用品
+      isdiet:false,//饮食
+      isdress:false,//服饰
+      isdigital:false,//数码
+      ishome_appliances:false,//家电
+      ismab:false//母婴
     }
   },
   components: {
@@ -49,15 +68,115 @@ export default {
     getGoodsList(){
       this.$axios.get("/api/getGoodsList").then((res)=>{
         this.goodsList=res.data
+         this.goodsList=this.goodsList.filter((item)=>{
+          return item.buyer==null
+        })
+      })
+    },
+    // 获取不同类型的商品
+    getGoodsSpecificList(key){
+      this.$axios.get("/api/getGoodsList").then((res)=>{
+        res.data.forEach(item=>{
+          item.img=item.img.split(',')
+        })
+        this.goodsList=res.data
+        if(key=="全部"){
+          this.isall=true
+          this.ishousehold_goods=false
+          this.isdiet=false
+          this.isdress=false
+          this.isdigital=false
+          this.ishome_appliances=false
+          this.ismab=false
+          this.goodsList=this.goodsList.filter((item)=>{
+            return item.buyer==null
+          })
+        }else if(key=="生活用品"){
+          this.isall=false
+          this.ishousehold_goods=true
+          this.isdiet=false
+          this.isdress=false
+          this.isdigital=false
+          this.ishome_appliances=false
+          this.ismab=false
+          this.goodsList=this.goodsList.filter((item)=>{
+            return item.type=="生活用品"&&item.buyer==null
+          })
+        }else if(key=="饮食"){
+          this.isall=false
+          this.ishousehold_goods=false
+          this.isdiet=true
+          this.isdress=false
+          this.isdigital=false
+          this.ishome_appliances=false
+          this.ismab=false
+          this.goodsList=this.goodsList.filter((item)=>{
+            return item.type=="饮食"&&item.buyer==null
+          })
+        }else if(key=="服饰"){
+          this.isall=false
+          this.ishousehold_goods=false
+          this.isdiet=false
+          this.isdress=true
+          this.isdigital=false
+          this.ishome_appliances=false
+          this.ismab=false
+          this.goodsList=this.goodsList.filter((item)=>{
+            return item.type=="服饰"&&item.buyer==null
+          })
+        }else if(key=="数码"){
+          this.isall=false
+          this.ishousehold_goods=false
+          this.isdiet=false
+          this.isdress=false
+          this.isdigital=true
+          this.ishome_appliances=false
+          this.ismab=false
+          this.goodsList=this.goodsList.filter((item)=>{
+            return item.type=="数码"&&item.buyer==null
+          })
+        }else if(key=="家电"){
+          this.isall=false
+          this.ishousehold_goods=false
+          this.isdiet=false
+          this.isdress=false
+          this.isdigital=false
+          this.ishome_appliances=true
+          this.ismab=false
+          this.goodsList=this.goodsList.filter((item)=>{
+            return item.type=="家电"&&item.buyer==null
+          })
+        }else if(key=="母婴"){
+          this.isall=false
+          this.ishousehold_goods=false
+          this.isdiet=false
+          this.isdress=false
+          this.isdigital=false
+          this.ishome_appliances=false
+          this.ismab=true
+          this.goodsList=this.goodsList.filter((item)=>{
+            return item.type=="母婴"&&item.buyer==null
+          })
+        }
       })
     },
     // 搜索商品列表
     search_by_kwd(){
+      this.isall=true
+      this.ishousehold_goods=false
+      this.isdiet=false
+      this.isdress=false
+      this.isdigital=false
+      this.ishome_appliances=false
+      this.ishome_appliances=false
       this.$axios.post("/api/searchGoodsList",this.kwd).then((res)=>{
         res.data.forEach(item=>{
           item.img=item.img.split(',')
         })
         this.goodsList=res.data
+        this.goodsList=this.goodsList.filter((item)=>{
+          return item.buyer==null
+        })
       })
     }
   }
@@ -98,6 +217,33 @@ export default {
   color: aliceblue;
   font-size: 17px;
   cursor: pointer;
+}
+
+.classify{
+  height: 60px;
+  margin-left: 30px;
+}
+
+.classify li{
+  float: left;
+  box-sizing: border-box;
+  color: #000000;
+  height: 60px;
+  margin: 0 25px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 60px;
+}
+
+.classify li:hover {
+  color: #ee3f4d;
+  border-bottom: 2px solid #ee3f4d;
+  cursor: pointer;
+}
+
+.active {
+  color: #ee3f4d;
+  border-bottom: 2px solid #ee3f4d;
 }
 
 .content{

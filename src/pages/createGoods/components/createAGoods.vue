@@ -41,13 +41,6 @@
                 alt=""
               />
               <span class="el-upload-list__item-actions">
-              <!--查看按钮-->
-                <span
-                  class="el-upload-list__item-preview"
-                  @click="handlePictureCardPreview(file)"
-                >
-                  <i class="el-icon-zoom-in"></i>
-                </span>
               <!--删除按钮-->
                 <span
                   v-if="!disabled"
@@ -109,7 +102,6 @@ export default {
       goods_price: '',
       goods_goodsnewold: '',
       dialogImageUrl: "",
-      dialogVisible: false,
       disabled: false,
       goodseeid: window.sessionStorage.getItem("UserID"),
       goodsee: window.sessionStorage.getItem("UserNAME"),
@@ -125,10 +117,6 @@ export default {
       this.goods_img=this.goods_img.filter(item=>{
         return item==file_url
       })
-    },
-    handlePictureCardPreview(file) {
-      this.dialogImageUrl = file.url;
-      this.dialogVisible = true;
     },
     img_success(response, file, fileList){
       console.log('111',response, file, fileList)
